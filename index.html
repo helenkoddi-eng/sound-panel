@@ -136,9 +136,9 @@
             pointer-events: none;
         }
 
-        /* Иконка проигрыша чуть меньше остальных (по вашему запросу) */
+        /* Уменьшаем иконку проигрыша */
         .icon-lose {
-            transform: scale(0.8);
+            transform: scale(0.85);
         }
 
         /* Растровые картинки (Барабан и Хлопки) делаем белыми и прозрачными */
@@ -212,19 +212,16 @@
 <div id="widget-container">
     <div class="sound-board" id="mainBoard">
         <button class="sound-btn" onclick="playSound('win')">
-            <!-- Кубок -->
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0011 15.9V19H7v2h10v-2h-4v-3.1a5.01 5.01 0 003.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
         </button>
         <button class="sound-btn" onclick="playSound('lose')">
-            <!-- Палец вниз (уменьшенный класс) -->
+            <!-- Добавлен класс .icon-lose для уменьшения -->
             <svg class="icon-lose" viewBox="0 0 24 24" fill="currentColor"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
         </button>
         <button class="sound-btn" onclick="playSound('drum')">
-            <!-- Барабан (ваша картинка) -->
             <img src="https://img.icons8.com/ios11/1200/snare-drum.jpg" alt="Барабан">
         </button>
         <button class="sound-btn" onclick="playSound('applause')">
-            <!-- Аплодисменты (ваша картинка) -->
             <img src="https://img.icons8.com/sf-regular/1200/applause.jpg" alt="Аплодисменты">
         </button>
     </div>
@@ -232,168 +229,28 @@
 
 <script>
     // ==========================================
-    // ЛОГИКА ГЕНЕРАЦИИ ЗВУКОВ (УЛУЧШЕННЫЙ СИНТЕЗАТОР)
+    // ЛОГИКА ПРОИГРЫВАНИЯ MP3 ЗВУКОВ
     // ==========================================
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx;
-    let sharedNoiseBuffer;
+    
+    // Создаем аудио-объекты, указывая ссылки на загруженные файлы
+    const audioFiles = {
+        win: new Audio('win.mp3'),
+        lose: new Audio('lose.mp3'),
+        drum: new Audio('drum.mp3'),
+        applause: new Audio('applause.mp3')
+    };
 
-    function initAudio() {
-        if (!audioCtx) {
-            audioCtx = new AudioContext();
-            const bufferSize = audioCtx.sampleRate * 5;
-            sharedNoiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const data = sharedNoiseBuffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-        }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-    }
-
-    function createNoiseNode() {
-        const source = audioCtx.createBufferSource();
-        source.buffer = sharedNoiseBuffer;
-        source.loop = true;
-        return source;
-    }
+    // Предзагружаем звуки для моментального срабатывания
+    Object.values(audioFiles).forEach(audio => {
+        audio.preload = 'auto';
+    });
 
     function playSound(type) {
-        initAudio();
-        const t = audioCtx.currentTime;
-
-        if (type === 'win') {
-            // Фанфары победы (остались без изменений)
-            const notes = [
-                { f: 392.00, t: 0.0, d: 0.15 }, 
-                { f: 523.25, t: 0.15, d: 0.15 },
-                { f: 659.25, t: 0.30, d: 0.15 }, 
-                { f: 783.99, t: 0.45, d: 0.8 }   
-            ];
-            notes.forEach(n => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.value = n.f;
-                gain.gain.setValueAtTime(0, t + n.t);
-                gain.gain.linearRampToValueAtTime(0.1, t + n.t + 0.02);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + n.t + n.d);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(t + n.t); osc.stop(t + n.t + n.d);
-            });
-        } 
-        else if (type === 'lose') {
-            // Грустный тромбон (остался без изменений)
-            const notes = [
-                { f: 349.23, t: 0, d: 0.4 },     
-                { f: 329.63, t: 0.4, d: 0.4 },   
-                { f: 311.13, t: 0.8, d: 0.4 },   
-                { f: 293.66, t: 1.2, d: 1.5, drop: 261.63 }
-            ];
-            notes.forEach(n => {
-                const osc = audioCtx.createOscillator();
-                const filter = audioCtx.createBiquadFilter();
-                const gain = audioCtx.createGain();
-
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(n.f, t + n.t);
-                if (n.drop) osc.frequency.exponentialRampToValueAtTime(n.drop, t + n.t + n.d);
-
-                filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(200, t + n.t);
-                filter.frequency.linearRampToValueAtTime(1500, t + n.t + 0.1);
-                filter.frequency.exponentialRampToValueAtTime(200, t + n.t + n.d);
-
-                gain.gain.setValueAtTime(0, t + n.t);
-                gain.gain.linearRampToValueAtTime(0.2, t + n.t + 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + n.t + n.d);
-
-                osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(t + n.t); osc.stop(t + n.t + n.d);
-            });
-        }
-        else if (type === 'drum') {
-            // УЛУЧШЕННАЯ БАРАБАННАЯ ДРОБЬ
-            let dur = 2.0;
-            let hits = 40;
-            
-            for (let i = 0; i < hits; i++) {
-                let time = t + (i * (dur / hits));
-                let vol = 0.1 + (i / hits) * 0.9; // Плавное нарастание громкости
-
-                // Стук мембраны (низкочастотный)
-                const osc = audioCtx.createOscillator();
-                const oscGain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(200, time);
-                osc.frequency.exponentialRampToValueAtTime(50, time + 0.1);
-                oscGain.gain.setValueAtTime(vol * 0.8, time);
-                oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
-                osc.connect(oscGain); oscGain.connect(audioCtx.destination);
-                osc.start(time); osc.stop(time + 0.1);
-
-                // Треск пружин барабана (шумовой)
-                const noise = createNoiseNode();
-                const nFilter = audioCtx.createBiquadFilter();
-                const nGain = audioCtx.createGain();
-                nFilter.type = 'bandpass';
-                nFilter.frequency.value = 2500;
-                nGain.gain.setValueAtTime(vol, time);
-                nGain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
-                noise.connect(nFilter); nFilter.connect(nGain); nGain.connect(audioCtx.destination);
-                noise.start(time); noise.stop(time + 0.1);
-            }
-            
-            // Финальный мощный удар тарелки (Crash)
-            const crashTime = t + dur;
-            const crashNoise = createNoiseNode();
-            const crashFilter = audioCtx.createBiquadFilter();
-            const crashGain = audioCtx.createGain();
-            crashFilter.type = 'highpass';
-            crashFilter.frequency.value = 5000;
-            crashGain.gain.setValueAtTime(1, crashTime);
-            crashGain.gain.exponentialRampToValueAtTime(0.001, crashTime + 3);
-            crashNoise.connect(crashFilter); crashFilter.connect(crashGain); crashGain.connect(audioCtx.destination);
-            crashNoise.start(crashTime); crashNoise.stop(crashTime + 3);
-        }
-        else if (type === 'applause') {
-            // УЛУЧШЕННЫЕ АПЛОДИСМЕНТЫ
-            const dur = 4;
-            
-            // 1. Фоновый гул толпы
-            const bgNoise = createNoiseNode();
-            const bgFilter = audioCtx.createBiquadFilter();
-            const bgGain = audioCtx.createGain();
-            bgFilter.type = 'bandpass';
-            bgFilter.frequency.value = 800;
-            bgGain.gain.setValueAtTime(0, t);
-            bgGain.gain.linearRampToValueAtTime(0.2, t + 1);
-            bgGain.gain.setValueAtTime(0.2, t + dur - 1);
-            bgGain.gain.linearRampToValueAtTime(0, t + dur);
-            bgNoise.connect(bgFilter); bgFilter.connect(bgGain); bgGain.connect(audioCtx.destination);
-            bgNoise.start(t); bgNoise.stop(t + dur);
-
-            // 2. Индивидуальные резкие хлопки ладоней (около 250 хлопков)
-            for (let i = 0; i < 250; i++) {
-                let clapTime = t + Math.random() * dur;
-                let env = Math.sin((clapTime - t) / dur * Math.PI); 
-                
-                // Делаем хлопки гуще в середине звука
-                if (Math.random() > env) continue;
-
-                const clapNoise = createNoiseNode();
-                const clapFilter = audioCtx.createBiquadFilter();
-                const clapGain = audioCtx.createGain();
-                
-                clapFilter.type = 'bandpass';
-                clapFilter.frequency.value = 1000 + Math.random() * 2000; // Разные ладони звучат по-разному
-                
-                let clapVol = (0.2 + Math.random() * 0.4) * env;
-                clapGain.gain.setValueAtTime(0, clapTime);
-                clapGain.gain.linearRampToValueAtTime(clapVol, clapTime + 0.002); // Очень резкая атака
-                clapGain.gain.exponentialRampToValueAtTime(0.001, clapTime + 0.08); // Быстрое затухание
-                
-                clapNoise.connect(clapFilter); clapFilter.connect(clapGain); clapGain.connect(audioCtx.destination);
-                clapNoise.start(clapTime); clapNoise.stop(clapTime + 0.1);
-            }
+        const sound = audioFiles[type];
+        if (sound) {
+            // Сбрасываем на начало, чтобы звук можно было нажимать быстро несколько раз подряд
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("Браузер заблокировал звук:", e));
         }
     }
 
@@ -425,7 +282,7 @@
             const board = document.getElementById('mainBoard');
             const buttons = document.querySelectorAll('.sound-btn');
             
-            // Если включен неон, добавляем свечение к самой панели (квадрату)
+            // Неоновое свечение для самой панели (подложки)
             if (neon) {
                 board.style.boxShadow = `0 0 5vmin ${color}, inset 0 0 3vmin ${color}`;
                 board.style.borderColor = color;
@@ -445,8 +302,17 @@
                 }
                 
                 btn.onmouseleave = btn.onmouseup;
-                btn.addEventListener('touchstart', (e) => { e.preventDefault(); btn.onmousedown(); playSound(btn.getAttribute('onclick').match(/'([^']+)'/)[1]); }, {passive: false});
-                btn.addEventListener('touchend', (e) => { e.preventDefault(); btn.onmouseup(); }, {passive: false});
+                
+                // Поддержка Touch-экранов (доски, планшеты) + моментальное срабатывание
+                btn.addEventListener('touchstart', (e) => { 
+                    e.preventDefault(); 
+                    btn.onmousedown(); 
+                    playSound(btn.getAttribute('onclick').match(/'([^']+)'/)[1]); 
+                }, {passive: false});
+                btn.addEventListener('touchend', (e) => { 
+                    e.preventDefault(); 
+                    btn.onmouseup(); 
+                }, {passive: false});
             });
         } catch(e) {
             console.error("Ошибка конфигурации", e);
