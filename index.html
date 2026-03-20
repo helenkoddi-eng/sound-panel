@@ -24,67 +24,69 @@
         }
 
         /* =========================================
-           СТИЛИ РЕДАКТОРА (Скрываются в виджете)
+           СТИЛИ РЕДАКТОРА (Компактный дизайн)
            ========================================= */
         #editor-container {
             display: none; background-color: var(--bg); color: var(--text);
-            width: 100%; height: 100%; padding: 20px; box-sizing: border-box;
-            overflow-y: auto; align-items: center; flex-direction: column;
+            width: 100%; height: 100%; padding: 10px; box-sizing: border-box; /* Уменьшен padding */
+            overflow-y: auto; align-items: center; justify-content: center; flex-direction: column;
         }
 
         .panel-box {
             max-width: 900px; width: 100%; background: var(--panel);
-            padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 20px 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Уменьшен вертикальный padding */
             box-sizing: border-box;
         }
 
-        h1 { text-align: center; margin-top: 0; color: var(--primary); margin-bottom: 30px;}
+        h1 { text-align: center; margin-top: 0; color: var(--primary); margin-bottom: 20px; font-size: 26px;} /* Меньше отступ */
 
-        .layout { display: flex; gap: 40px; flex-wrap: wrap; }
-        .controls { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px; }
+        .layout { display: flex; gap: 30px; flex-wrap: wrap; }
+        .controls { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; } /* Меньше gap */
         .preview { flex: 1; min-width: 300px; display: flex; flex-direction: column; align-items: center; }
 
         .preview-box {
-            width: 100%; max-width: 350px; aspect-ratio: 1/1;
+            width: 100%; max-width: 320px; aspect-ratio: 1/1; /* Чуть компактнее предпросмотр */
             border: 2px dashed var(--border); border-radius: 16px;
             background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="10" height="10" fill="%23eee"/><rect x="10" y="10" width="10" height="10" fill="%23eee"/></svg>');
             position: relative; overflow: hidden; resize: both;
         }
 
         .preview-box iframe { width: 100%; height: 100%; border: none; }
-        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        .control-group { display: flex; flex-direction: column; gap: 6px; }
         label { font-weight: 600; font-size: 14px; }
         
-        input[type="color"] { width: 100%; height: 45px; border: none; border-radius: 8px; cursor: pointer; padding: 0; }
+        input[type="color"] { width: 100%; height: 40px; border: none; border-radius: 8px; cursor: pointer; padding: 0; }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: 1px solid var(--border); border-radius: 8px; }
         
-        .checkbox-group { display: flex; align-items: center; gap: 10px; cursor: pointer; background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border);}
+        .checkbox-group { display: flex; align-items: center; gap: 10px; cursor: pointer; background: #f9f9f9; padding: 10px; border-radius: 8px; border: 1px solid var(--border);}
         .checkbox-group input { width: 20px; height: 20px; cursor: pointer; }
 
         button.action-btn {
             width: 100%; background-color: var(--primary); color: white; border: none;
-            padding: 14px 20px; border-radius: 8px; font-size: 15px;
+            padding: 12px 20px; border-radius: 8px; font-size: 15px;
             font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;
         }
         button.action-btn:hover { filter: brightness(1.1); }
 
         textarea {
-            width: 100%; height: 100px; padding: 12px; border-radius: 8px;
+            width: 100%; height: 75px; padding: 12px; border-radius: 8px; /* Сильно уменьшена высота textarea */
             border: 1px solid var(--border); font-family: monospace;
-            font-size: 13px; resize: vertical; box-sizing: border-box; background: #f4f7f6;
-            color: #555; line-height: 1.5;
+            font-size: 12px; resize: vertical; box-sizing: border-box; background: #f4f7f6;
+            color: #555; line-height: 1.4;
         }
 
         footer {
-            margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border);
-            text-align: center; font-size: 13px; color: #777;
-            display: flex; flex-direction: column; align-items: center; gap: 12px;
+            margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border); /* Придвинут футер */
+            text-align: center; font-size: 12px; color: #777;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
         .social-links { display: flex; gap: 15px; }
         .social-links a { color: #777; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color 0.2s; font-weight: 500;}
         .social-links a:hover { color: var(--primary); }
-        .social-links svg { width: 20px; height: 20px; fill: currentColor; }
+        .social-links svg { width: 18px; height: 18px; fill: currentColor; }
+        
+        p.preview-hint { font-size: 12px; color: #777; margin-top: 10px; text-align: center; line-height: 1.3; margin-bottom: 0;}
 
         /* =========================================
            СТИЛИ ВИДЖЕТА (САМА ПАНЕЛЬ) - VMIN
@@ -136,12 +138,10 @@
             pointer-events: none;
         }
 
-        /* Уменьшаем иконку проигрыша */
         .icon-lose {
             transform: scale(0.85);
         }
 
-        /* Растровые картинки (Барабан и Хлопки) делаем белыми и прозрачными */
         .sound-btn img {
             width: 22vmin; height: 22vmin;
             object-fit: contain;
@@ -168,8 +168,6 @@
                     <span style="font-weight: 600; font-size: 15px;">Включить неоновое свечение</span>
                 </label>
                 
-                <div style="height: 10px;"></div>
-
                 <button id="copyBtn" class="action-btn">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                     Скопировать код
@@ -186,8 +184,8 @@
                 <div class="preview-box">
                     <iframe id="previewFrame" allowtransparency="true"></iframe>
                 </div>
-                <p style="font-size: 13px; color: #777; margin-top: 15px; text-align: center; line-height: 1.4;">
-                    Нажимайте на кнопки, чтобы услышать звук!<br>Потяните окно за нижний правый угол, чтобы проверить 3D-масштабирование.
+                <p class="preview-hint">
+                    Нажимайте на кнопки, чтобы услышать звук!<br>Потяните окно за угол для проверки масштаба.
                 </p>
             </div>
         </div>
@@ -215,7 +213,6 @@
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0011 15.9V19H7v2h10v-2h-4v-3.1a5.01 5.01 0 003.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
         </button>
         <button class="sound-btn" onclick="playSound('lose')">
-            <!-- Добавлен класс .icon-lose для уменьшения -->
             <svg class="icon-lose" viewBox="0 0 24 24" fill="currentColor"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
         </button>
         <button class="sound-btn" onclick="playSound('drum')">
@@ -232,7 +229,6 @@
     // ЛОГИКА ПРОИГРЫВАНИЯ MP3 ЗВУКОВ
     // ==========================================
     
-    // Создаем аудио-объекты, указывая ссылки на загруженные файлы
     const audioFiles = {
         win: new Audio('win.mp3'),
         lose: new Audio('lose.mp3'),
@@ -240,7 +236,6 @@
         applause: new Audio('applause.mp3')
     };
 
-    // Предзагружаем звуки для моментального срабатывания
     Object.values(audioFiles).forEach(audio => {
         audio.preload = 'auto';
     });
@@ -248,7 +243,6 @@
     function playSound(type) {
         const sound = audioFiles[type];
         if (sound) {
-            // Сбрасываем на начало, чтобы звук можно было нажимать быстро несколько раз подряд
             sound.currentTime = 0;
             sound.play().catch(e => console.log("Браузер заблокировал звук:", e));
         }
@@ -282,7 +276,6 @@
             const board = document.getElementById('mainBoard');
             const buttons = document.querySelectorAll('.sound-btn');
             
-            // Неоновое свечение для самой панели (подложки)
             if (neon) {
                 board.style.boxShadow = `0 0 5vmin ${color}, inset 0 0 3vmin ${color}`;
                 board.style.borderColor = color;
@@ -303,7 +296,6 @@
                 
                 btn.onmouseleave = btn.onmouseup;
                 
-                // Поддержка Touch-экранов (доски, планшеты) + моментальное срабатывание
                 btn.addEventListener('touchstart', (e) => { 
                     e.preventDefault(); 
                     btn.onmousedown(); 
@@ -335,7 +327,6 @@
         function updatePreviewAndCode() {
             const hash = getConfigHash();
             previewFrame.src = `${baseUrl}?config=${hash}`;
-            // Изменены min-width и min-height на 100px
             const iframeCode = `<iframe src="${baseUrl}?config=${hash}" width="400" height="400" style="width: 100%; height: 100%; min-width: 100px; min-height: 100px;" frameborder="0" allowtransparency="true"></iframe>`;
             codeOutput.value = iframeCode;
         }
