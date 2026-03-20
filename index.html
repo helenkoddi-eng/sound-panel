@@ -119,18 +119,33 @@
             transition: transform 0.1s, box-shadow 0.1s, filter 0.3s;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Иконки на всю кнопку */
-        .sound-btn svg {
-            width: 24vmin; height: 24vmin;
-            fill: white;
-            filter: drop-shadow(0 0.5vmin 0.5vmin rgba(0,0,0,0.2));
+            overflow: hidden; /* Чтобы картинки не вылезали */
         }
 
         /* 3D эффект нажимания */
         .sound-btn:active {
             transform: translateY(2vmin) !important;
+        }
+
+        /* СТИЛИ ДЛЯ ИКОНОК (SVG и IMG) */
+        
+        /* Векторные иконки (Кубок и Палец) - просто белые */
+        .sound-btn svg {
+            width: 22vmin; height: 22vmin;
+            fill: white;
+            filter: drop-shadow(0 0.5vmin 0.5vmin rgba(0,0,0,0.2));
+            pointer-events: none;
+        }
+
+        /* Растровые картинки (Барабан и Хлопки) */
+        /* Трюк: инвертируем черный в белый, а белый фон в черный */
+        /* Затем mix-blend-mode: screen делает черный фон прозрачным */
+        .sound-btn img {
+            width: 22vmin; height: 22vmin;
+            object-fit: contain;
+            filter: invert(1) contrast(1.2); /* Делаем белым */
+            mix-blend-mode: screen; /* Убираем фон */
+            pointer-events: none;
         }
     </style>
 </head>
@@ -144,7 +159,7 @@
             <div class="controls">
                 <div class="control-group">
                     <label for="colorPicker">Основной цвет 3D-кнопок</label>
-                    <input type="color" id="colorPicker" value="#4A90E2">
+                    <input type="color" id="colorPicker" value="#ff4757">
                 </div>
                 <label class="checkbox-group">
                     <input type="checkbox" id="neonToggle">
@@ -191,7 +206,7 @@
     </div>
 </div>
 
-<!-- РЕЖИМ ВИДЖЕТА (Скрыт в редакторе) -->
+<!-- РЕЖИМ ВИДЖЕТА -->
 <div id="widget-container">
     <div class="sound-board">
         <button class="sound-btn" onclick="playSound('win')">
@@ -202,65 +217,176 @@
             <!-- Палец вниз -->
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
         </button>
+        
+        <!-- КНОПКА БАРАБАН (Вставлена ваша ссылка) -->
         <button class="sound-btn" onclick="playSound('drum')">
-            <!-- Точный барабан из запроса -->
-            <svg viewBox="0 0 100 100" fill="currentColor">
-                <path d="M15 45 C 15 65, 85 65, 85 45 L 85 80 C 85 100, 15 100, 15 80 Z" />
-                <path d="M15 45 C 15 25, 85 25, 85 45 C 85 65, 15 65, 15 45 Z" fill="#fff" />
-                <path d="M15 45 C 15 25, 85 25, 85 45 C 85 65, 15 65, 15 45 Z" fill="none" stroke="currentColor" stroke-width="12" />
-                <rect x="25" y="55" width="8" height="40" rx="4" fill="#fff" />
-                <rect x="67" y="55" width="8" height="40" rx="4" fill="#fff" />
-                <rect x="30" y="5" width="8" height="50" rx="4" transform="rotate(45 34 30)" fill="currentColor" />
-                <rect x="60" y="10" width="8" height="50" rx="4" transform="rotate(-50 64 35)" fill="currentColor" />
-            </svg>
+            <img src="https://img.icons8.com/ios11/1200/snare-drum.jpg" alt="Барабан">
         </button>
+        
+        <!-- КНОПКА АПЛОДИСМЕНТЫ (Вставлена ваша ссылка) -->
         <button class="sound-btn" onclick="playSound('applause')">
-            <!-- Точные хлопающие ладони из запроса -->
-            <svg viewBox="0 0 100 100" fill="currentColor">
-                <!-- Левая рука (пальцы веером) -->
-                <path d="M 60 45 L 35 20 A 4 4 0 0 0 25 30 L 45 50" stroke="currentColor" stroke-width="8" stroke-linecap="round" />
-                <path d="M 55 55 L 25 25 A 4 4 0 0 0 15 35 L 40 60" stroke="currentColor" stroke-width="8" stroke-linecap="round" />
-                <path d="M 50 65 L 15 40 A 4 4 0 0 0 5 50 L 35 70" stroke="currentColor" stroke-width="8" stroke-linecap="round" />
-                <path d="M 45 75 L 15 55 A 4 4 0 0 0 5 65 L 30 80" stroke="currentColor" stroke-width="8" stroke-linecap="round" />
-                <path d="M 40 85 L 20 70 A 4 4 0 0 0 10 80 L 25 90" stroke="currentColor" stroke-width="8" stroke-linecap="round" />
-                <!-- Правая рука (сплошная ладонь и большой палец) -->
-                <path d="M 55 50 C 60 25, 85 15, 80 40 C 78 50, 85 55, 85 65 C 85 90, 55 95, 40 85 C 60 75, 55 60, 55 50 Z" />
-            </svg>
+            <img src="https://img.icons8.com/sf-regular/1200/applause.jpg" alt="Аплодисменты">
         </button>
     </div>
 </div>
 
 <script>
     // ==========================================
-    // ЛОГИКА ПРОИГРЫВАНИЯ РЕАЛЬНЫХ ЗВУКОВ (MP3/OGG)
+    // ЛОГИКА ГЕНЕРАЦИИ ЗВУКОВ (ВАШ ИДЕАЛЬНЫЙ ВАРИАНТ)
     // ==========================================
-    // Используем официальную открытую библиотеку звуков Google
-    const audioFiles = {
-        win: new Audio('https://actions.google.com/sounds/v1/cartoon/cartoon_success_fanfare.ogg'),
-        lose: new Audio('https://actions.google.com/sounds/v1/cartoon/trombone_womp_womp.ogg'),
-        drum: new Audio('https://actions.google.com/sounds/v1/cartoon/drum_roll.ogg'),
-        applause: new Audio('https://actions.google.com/sounds/v1/crowds/light_applause.ogg')
-    };
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+    let sharedNoiseBuffer;
 
-    // Предзагрузка звуков для моментального срабатывания
-    Object.values(audioFiles).forEach(audio => {
-        audio.preload = 'auto';
-        audio.load();
-    });
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new AudioContext();
+            const bufferSize = audioCtx.sampleRate * 5;
+            sharedNoiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = sharedNoiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function createNoiseNode() {
+        const source = audioCtx.createBufferSource();
+        source.buffer = sharedNoiseBuffer;
+        source.loop = true;
+        return source;
+    }
 
     function playSound(type) {
-        const sound = audioFiles[type];
-        if (sound) {
-            sound.currentTime = 0; // Сбрасываем звук на начало, если кнопка нажата повторно
-            sound.play().catch(e => console.log("Браузер заблокировал автовоспроизведение:", e));
+        initAudio();
+        const t = audioCtx.currentTime;
+
+        if (type === 'win') {
+            const notes = [
+                { f: 392.00, t: 0.0, d: 0.15 }, 
+                { f: 523.25, t: 0.15, d: 0.15 },
+                { f: 659.25, t: 0.30, d: 0.15 }, 
+                { f: 783.99, t: 0.45, d: 0.8 }   
+            ];
+            notes.forEach(n => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.value = n.f;
+                gain.gain.setValueAtTime(0, t + n.t);
+                gain.gain.linearRampToValueAtTime(0.1, t + n.t + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + n.t + n.d);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(t + n.t); osc.stop(t + n.t + n.d);
+            });
+        } 
+        else if (type === 'lose') {
+            const notes = [
+                { f: 349.23, t: 0, d: 0.4 },     
+                { f: 329.63, t: 0.4, d: 0.4 },   
+                { f: 311.13, t: 0.8, d: 0.4 },   
+                { f: 293.66, t: 1.2, d: 1.5, drop: 261.63 }
+            ];
+            notes.forEach(n => {
+                const osc = audioCtx.createOscillator();
+                const filter = audioCtx.createBiquadFilter();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(n.f, t + n.t);
+                if (n.drop) osc.frequency.exponentialRampToValueAtTime(n.drop, t + n.t + n.d);
+
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(200, t + n.t);
+                filter.frequency.linearRampToValueAtTime(1500, t + n.t + 0.1);
+                filter.frequency.exponentialRampToValueAtTime(200, t + n.t + n.d);
+
+                gain.gain.setValueAtTime(0, t + n.t);
+                gain.gain.linearRampToValueAtTime(0.2, t + n.t + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + n.t + n.d);
+
+                osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(t + n.t); osc.stop(t + n.t + n.d);
+            });
+        }
+        else if (type === 'drum') {
+            let dur = 1.8;
+            let hits = 30;
+            const hit = (time, vol) => {
+                const osc = audioCtx.createOscillator();
+                const oscGain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(250, time);
+                osc.frequency.exponentialRampToValueAtTime(100, time + 0.1);
+                oscGain.gain.setValueAtTime(vol * 0.5, time);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                osc.connect(oscGain); oscGain.connect(audioCtx.destination);
+                osc.start(time); osc.stop(time + 0.1);
+
+                const noise = createNoiseNode();
+                const noiseFilter = audioCtx.createBiquadFilter();
+                const noiseGain = audioCtx.createGain();
+                noiseFilter.type = 'highpass';
+                noiseFilter.frequency.value = 800;
+                noiseGain.gain.setValueAtTime(vol, time);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
+                noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+                noise.start(time); noise.stop(time + 0.2);
+            };
+
+            for (let i = 0; i < hits; i++) {
+                hit(t + (i * (dur / hits)), 0.1 + (i / hits) * 0.4);
+            }
+            const crashTime = t + dur;
+            const noise = createNoiseNode();
+            const crashFilter = audioCtx.createBiquadFilter();
+            const crashGain = audioCtx.createGain();
+            crashFilter.type = 'highpass';
+            crashFilter.frequency.value = 4000;
+            crashGain.gain.setValueAtTime(0.6, crashTime);
+            crashGain.gain.exponentialRampToValueAtTime(0.001, crashTime + 2.5);
+            noise.connect(crashFilter); crashFilter.connect(crashGain); crashGain.connect(audioCtx.destination);
+            noise.start(crashTime); noise.stop(crashTime + 2.5);
+        }
+        else if (type === 'applause') {
+            const dur = 4;
+            const roar = createNoiseNode();
+            const roarFilter = audioCtx.createBiquadFilter();
+            const roarGain = audioCtx.createGain();
+            roarFilter.type = 'lowpass';
+            roarFilter.frequency.value = 800;
+            roarGain.gain.setValueAtTime(0, t);
+            roarGain.gain.linearRampToValueAtTime(0.15, t + 1);
+            roarGain.gain.setValueAtTime(0.15, t + dur - 1);
+            roarGain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+            roar.connect(roarFilter); roarFilter.connect(roarGain); roarGain.connect(audioCtx.destination);
+            roar.start(t); roar.stop(t + dur);
+
+            for (let i = 0; i < 150; i++) {
+                let clapTime = t + Math.random() * dur;
+                let envelope = Math.sin((clapTime - t) / dur * Math.PI); 
+                if (Math.random() > envelope + 0.1) continue;
+
+                const clapNoise = createNoiseNode();
+                const clapFilter = audioCtx.createBiquadFilter();
+                const clapGain = audioCtx.createGain();
+                
+                clapFilter.type = 'bandpass';
+                clapFilter.frequency.value = 1000 + Math.random() * 1500;
+                let vol = (0.2 + Math.random() * 0.3) * envelope;
+                
+                clapGain.gain.setValueAtTime(0, clapTime);
+                clapGain.gain.linearRampToValueAtTime(vol, clapTime + 0.005);
+                clapGain.gain.exponentialRampToValueAtTime(0.001, clapTime + 0.1);
+                clapNoise.connect(clapFilter); clapFilter.connect(clapGain); clapGain.connect(audioCtx.destination);
+                clapNoise.start(clapTime); clapNoise.stop(clapTime + 0.15);
+            }
         }
     }
 
     // ==========================================
-    // ЛОГИКА РОУТИНГА И РЕДАКТОРА
+    // ЛОГИКА РОУТИНГА
     // ==========================================
     
-    // Вычисление темного цвета для 3D тени
     function darkenColor(hex, percent) {
         let r = parseInt(hex.substring(1,3), 16);
         let g = parseInt(hex.substring(3,5), 16);
@@ -275,11 +401,10 @@
     const configParam = urlParams.get('config');
 
     if (configParam) {
-        // РЕЖИМ ВИДЖЕТА (Панель звуков)
         document.getElementById('widget-container').style.display = 'flex';
         try {
             const config = JSON.parse(decodeURIComponent(atob(configParam)));
-            const color = config.c || '#4A90E2';
+            const color = config.c || '#ff4757';
             const neon = config.n || false;
             
             const darkColor = darkenColor(color, 25);
@@ -287,7 +412,6 @@
             
             buttons.forEach(btn => {
                 btn.style.backgroundColor = color;
-                
                 if (neon) {
                     btn.style.boxShadow = `0 1.5vmin 0 ${darkColor}, 0 2vmin 4vmin ${color}`;
                     btn.onmousedown = () => btn.style.boxShadow = `0 0vmin 0 ${darkColor}, 0 0 2vmin ${color}`;
@@ -297,7 +421,6 @@
                     btn.onmousedown = () => btn.style.boxShadow = `0 0vmin 0 ${darkColor}, 0 0 1vmin rgba(0,0,0,0.3)`;
                     btn.onmouseup = () => btn.style.boxShadow = `0 1.5vmin 0 ${darkColor}, 0 2vmin 3vmin rgba(0,0,0,0.3)`;
                 }
-                
                 btn.onmouseleave = btn.onmouseup;
                 btn.addEventListener('touchstart', (e) => { e.preventDefault(); btn.onmousedown(); playSound(btn.getAttribute('onclick').match(/'([^']+)'/)[1]); }, {passive: false});
                 btn.addEventListener('touchend', (e) => { e.preventDefault(); btn.onmouseup(); }, {passive: false});
@@ -307,15 +430,12 @@
         }
 
     } else {
-        // РЕЖИМ РЕДАКТОРА
         document.getElementById('editor-container').style.display = 'flex';
-
         const colorPicker = document.getElementById('colorPicker');
         const neonToggle = document.getElementById('neonToggle');
         const previewFrame = document.getElementById('previewFrame');
         const codeOutput = document.getElementById('codeOutput');
         const copyBtn = document.getElementById('copyBtn');
-
         const baseUrl = window.location.href.split('?')[0];
 
         function getConfigHash() {
@@ -323,11 +443,9 @@
             return btoa(encodeURIComponent(JSON.stringify(configObj)));
         }
 
-        // Обновляется моментально при любом клике!
         function updatePreviewAndCode() {
             const hash = getConfigHash();
             previewFrame.src = `${baseUrl}?config=${hash}`;
-            
             const iframeCode = `<iframe src="${baseUrl}?config=${hash}" width="400" height="400" style="width: 100%; height: 100%; min-width: 200px; min-height: 200px;" frameborder="0" allowtransparency="true"></iframe>`;
             codeOutput.value = iframeCode;
         }
@@ -335,21 +453,15 @@
         function copyToClipboard() {
             codeOutput.select();
             document.execCommand('copy');
-            
             const originalText = copyBtn.innerHTML;
             copyBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Скопировано!';
             copyBtn.style.backgroundColor = '#28a745';
-            
-            setTimeout(() => {
-                copyBtn.innerHTML = originalText;
-                copyBtn.style.backgroundColor = '';
-            }, 2000);
+            setTimeout(() => { copyBtn.innerHTML = originalText; copyBtn.style.backgroundColor = ''; }, 2000);
         }
 
         colorPicker.addEventListener('input', updatePreviewAndCode);
         neonToggle.addEventListener('change', updatePreviewAndCode);
         copyBtn.addEventListener('click', copyToClipboard);
-
         updatePreviewAndCode();
     }
 </script>
